@@ -41,4 +41,12 @@ records = Table(
     Column('date', String, nullable=False)
 )
 
-meta.create_all(engine)
+def init_db():
+    meta.create_all(engine)
+
+def get_db():
+    conn = engine.connect()
+    try:
+        yield conn
+    finally:
+        conn.close()
