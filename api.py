@@ -30,6 +30,15 @@ def get_products(conn = Depends(get_db)):
     except Exception as e:
         return {"Message": f"Error occurred while fetching products: {str(e)}"}
     
+@app.delete("/delete_product/{product_id}")
+def delete_product(product_id: int, conn = Depends(get_db)):
+    try:
+        query = products.delete().where(products.c.id == product_id)
+        conn.execute(query)
+        conn.commit()
+        return {"Message": f"Product with ID {product_id} deleted successfully!"}
+    except Exception as e:
+        return {"Message": f"Error occurred while deleting product: {str(e)}"}
 
 
 """
