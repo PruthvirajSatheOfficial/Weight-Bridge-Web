@@ -29,12 +29,16 @@ suppliers = Table(
     Column('Name', String, nullable=False)
 )
 
+records = Table(
+    "records",
+    meta,
+    Column('id', Integer, primary_key=True),
+    Column('product_id', Integer, nullable=False),
+    Column('supplier_id', String, nullable=False),
+    Column('tare_weight', Integer, nullable=False),
+    Column('gross_weight', Integer, nullable=False),
+    Column('net_weight', Integer, nullable=False),
+    Column('date', String, nullable=False)
+)
+
 meta.create_all(engine)
-
-# inspector = inspect(engine)
-# print("Tables found in database:", inspector.get_table_names())
-
-insert_query = products.insert().values(name="Concrete", id=2)
-conn = engine.connect()
-conn.execute(insert_query)
-conn.commit()

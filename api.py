@@ -15,7 +15,7 @@ class User(BaseModel):
     role : str
 
 class Supplier(BaseModel):
-    id : int
+    id : str
     name : str
 
 class Product(BaseModel):
