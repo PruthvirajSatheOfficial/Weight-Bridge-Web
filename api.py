@@ -1,31 +1,35 @@
-from fastapi import FastAPI
-from pydantic import BaseModel
-from datetime import datetime
+from fastapi import Depends, FastAPI
+from database import get_db , products, users, suppliers, records
+from models import Product
 
-app = FastAPI() 
-
-# Class List 6/11/26
-
-class User(BaseModel):
-    id : int
-    username : str
-    firstname : str
-    lastname : str
-    password : str 
-    role : str
-
-class Supplier(BaseModel):
-    id : str
-    name : str
-
-class Product(BaseModel):
-    id : int
-    name : str 
-
+app = FastAPI()
 
 @app.get("/")
 def base():
     return ("Message : Welcome To Weigh Bridge")
+
+@app.post("/add_product")
+def add_product(product: Product, conn = Depends(get_db)):
+    id = product.id
+    name = product.name
+    try:
+        query = products.insert().values(id=id, name=name)
+        conn.execute(query)
+        conn.commit()
+        return {"Message": f"Product {product.name} added successfully!"}
+    except Exception as e:
+        return {"Message": f"Error occurred while adding product: {str(e)}"}
+
+@app.get("/get_products")
+def get_products(conn = Depends(get_db)):
+    try:
+        query = products.select()
+        result = conn.execute(query)
+        products_list = [{"id": row.id, "name": row.name} for row in result]
+        return {"products": products_list}
+    except Exception as e:
+        return {"Message": f"Error occurred while fetching products: {str(e)}"}
+    
 
 
 """
