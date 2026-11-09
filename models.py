@@ -18,3 +18,12 @@ class Supplier(BaseModel):
 class Product(BaseModel):
     id : int
     name : str 
+
+class Record(BaseModel):
+    id : int
+    supplier_id : str
+    product_id : int
+    weight : float
+    tare_weight : float
+    net_weight : float
+    date_time : datetime
