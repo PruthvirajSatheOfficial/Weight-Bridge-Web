@@ -38,7 +38,7 @@ records = Table(
     Column('tare_weight', Integer, nullable=True),
     Column('gross_weight', Integer, nullable=True),
     Column('net_weight', Integer, nullable=True),
-    Column('date', String, nullable=False),
+    Column('date_time', String, nullable=False),
     Column('ticket_number', String, nullable=False),
     Column('status', String, nullable=False)
 )

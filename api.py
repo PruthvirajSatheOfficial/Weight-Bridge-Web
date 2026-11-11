@@ -1,14 +1,14 @@
-from fastapi import Depends, FastAPI
+from fastapi import Depends, FastAPI, HTTPException, APIRouter
 from database import get_db , products, users, suppliers, records
 from models import Product, User, Record, Supplier
 
-app = FastAPI()
+router = APIRouter()
 
-@app.get("/")
+@router.get("/")
 def base():
     return ("Message : Welcome To Weigh Bridge")
 
-@app.post("/add_product")
+@router.post("/add_product")
 def add_product(product: Product, conn = Depends(get_db)):
     id = product.id
     name = product.name
@@ -20,7 +20,7 @@ def add_product(product: Product, conn = Depends(get_db)):
     except Exception as e:
         return {"Message": f"Error occurred while adding product: {str(e)}"}
 
-@app.get("/get_products")
+@router.get("/get_products")
 def get_products(conn = Depends(get_db)):
     try:
         query = products.select()
@@ -29,8 +29,8 @@ def get_products(conn = Depends(get_db)):
         return {"products": products_list}
     except Exception as e:
         return {"Message": f"Error occurred while fetching products: {str(e)}"}
-    
-@app.delete("/delete_product/{product_id}")
+
+@router.delete("/delete_product/{product_id}")
 def delete_product(product_id: int, conn = Depends(get_db)):
     try:
         query = products.delete().where(products.c.id == product_id)
@@ -40,7 +40,7 @@ def delete_product(product_id: int, conn = Depends(get_db)):
     except Exception as e:
         return {"Message": f"Error occurred while deleting product: {str(e)}"}
 
-@app.post('/user/add_user')
+@router.post('/user/add_user')
 def add_user(user: User, conn = Depends(get_db)):
     try:
         query = users.insert().values(
@@ -56,7 +56,7 @@ def add_user(user: User, conn = Depends(get_db)):
     except Exception as e:
         return {"Message": f"Error occurred while adding user: {str(e)}"}
 
-@app.get('/user/get_users')
+@router.get('/user/get_users')
 def get_users(conn = Depends(get_db)):
     try:
         query = users.select()
@@ -66,7 +66,7 @@ def get_users(conn = Depends(get_db)):
     except Exception as e:
         return {"Message": f"Error occurred while fetching users: {str(e)}"}
 
-@app.delete('/user/delete_user/{user_id}')
+@router.delete('/user/delete_user/{user_id}')
 def delete_user(user_id: int, conn = Depends(get_db)):
     try:
         query = users.delete().where(users.c.id == user_id)
@@ -76,7 +76,7 @@ def delete_user(user_id: int, conn = Depends(get_db)):
     except Exception as e:
         return {"Message": f"Error occurred while deleting user: {str(e)}"}
 
-@app.post('/user/update_user/{user_id}')
+@router.post('/user/update_user/{user_id}')
 def update_user(user_id: int, user: User, conn = Depends(get_db)):
     try:
         query = users.update().where(users.c.id == user_id).values(
@@ -92,7 +92,7 @@ def update_user(user_id: int, user: User, conn = Depends(get_db)):
     except Exception as e:
         return {"Message": f"Error occurred while updating user: {str(e)}"}
 
-@app.post('/user/login')
+@router.post('/user/login')
 def login(username: str, password: str, conn = Depends(get_db)):
     try:
         query = users.select().where(users.c.username == username).where(users.c.password == password)
@@ -104,61 +104,8 @@ def login(username: str, password: str, conn = Depends(get_db)):
     except Exception as e:
         return {"Message": f"Error occurred during login: {str(e)}"}
 
-@app.get('/record/get_records')
-def get_records(conn = Depends(get_db)):
-    try:
-        query = records.select()
-        result = conn.execute(query)
-        records_list = [{"id": row.id, "supplier_id": row.supplier_id, "product_id": row.product_id, "weight": row.weight, "tare_weight": row.tare_weight, "net_weight": row.net_weight, "date_time": row.date_time} for row in result]
-        return {"records": records_list}
-    except Exception as e:
-        return {"Message": f"Error occurred while fetching records: {str(e)}"}
 
-@app.post('/record/add_record')
-def add_record(record: Record, conn = Depends(get_db)):
-    try:
-        query = records.insert().values(
-            supplier_id=record.supplier_id,
-            product_id=record.product_id,
-            weight=record.gross_weight,
-            tare_weight=record.tare_weight,
-            net_weight=record.net_weight,
-            date_time=record.date_time
-        )
-        conn.execute(query)
-        conn.commit()
-        return {"Message": f"Record added successfully!"}
-    except Exception as e:
-        return {"Message": f"Error occurred while adding record: {str(e)}"}
-
-@app.delete('/record/delete_record/{record_id}')
-def delete_record(record_id: int, conn = Depends(get_db)):
-    try:
-        query = records.delete().where(records.c.id == record_id)
-        conn.execute(query)
-        conn.commit()
-        return {"Message": f"Record with ID {record_id} deleted successfully!"}
-    except Exception as e:
-        return {"Message": f"Error occurred while deleting record: {str(e)}"}
-
-@app.post('/record/update_record/{record_id}')
-def update_record(record_id: int, record: Record, conn = Depends(get_db)):
-    try:
-        query = records.update().where(records.c.id == record_id).values(
-            supplier_id=record.supplier_id,
-            product_id=record.product_id,
-            weight=record.gross_weight,
-            tare_weight=record.tare_weight,
-            net_weight=record.net_weight,
-            date_time=record.date_time
-        )
-        conn.execute(query)
-        conn.commit()
-        return {"Message": f"Record with ID {record_id} updated successfully!"}
-    except Exception as e:
-        return {"Message": f"Error occurred while updating record: {str(e)}"}
-
-@app.post('/supplier/add_supplier')
+@router.post('/supplier/add_supplier')
 def add_supplier(supplier: Supplier, conn = Depends(get_db)):
     try:
         query = suppliers.insert().values(
@@ -171,7 +118,7 @@ def add_supplier(supplier: Supplier, conn = Depends(get_db)):
     except Exception as e:
         return {"Message": f"Error occurred while adding supplier: {str(e)}"}
 
-@app.get('/supplier/get_suppliers')
+@router.get('/supplier/get_suppliers')
 def get_suppliers(conn = Depends(get_db)):
     try:
         query = suppliers.select()
@@ -181,7 +128,7 @@ def get_suppliers(conn = Depends(get_db)):
     except Exception as e:
         return {"Message": f"Error occurred while fetching suppliers: {str(e)}"}
 
-@app.delete('/supplier/delete_supplier/{supplier_id}')
+@router.delete('/supplier/delete_supplier/{supplier_id}')
 def delete_supplier(supplier_id: str, conn = Depends(get_db)):
     try:
         query = suppliers.delete().where(suppliers.c.id == supplier_id)
@@ -191,7 +138,7 @@ def delete_supplier(supplier_id: str, conn = Depends(get_db)):
     except Exception as e:
         return {"Message": f"Error occurred while deleting supplier: {str(e)}"}
 
-@app.post('/supplier/update_supplier/{supplier_id}')
+@router.post('/supplier/update_supplier/{supplier_id}')
 def update_supplier(supplier_id: str, supplier: Supplier, conn = Depends(get_db)):
     try:
         query = suppliers.update().where(suppliers.c.id == supplier_id).values(
@@ -204,4 +151,36 @@ def update_supplier(supplier_id: str, supplier: Supplier, conn = Depends(get_db)
         return {"Message": f"Error occurred while updating supplier: {str(e)}"}
 
 
+@router.post('/record/first_record')
+def first_record(record: Record, conn = Depends(get_db)):
+    try:
+        query = records.insert().values(
+            supplier_id=record.supplier_id,
+            product_id=record.product_id,
+            tare_weight=record.tare_weight,
+            gross_weight=record.gross_weight,
+            net_weight=record.net_weight,
+            date_time=record.date_time,
+            ticket_number=record.ticket_number,
+            status=record.status
+        )
+        conn.execute(query)
+        conn.commit()
+        return {"Message": f"First record added successfully!"}
+    except Exception as e:
+        return {"Message": f"Error occurred while adding first record: {str(e)}"}
 
+@router.post('/record/second_record')
+def second_record(record: Record, conn = Depends(get_db)):
+    try:
+        query = records.insert().values(
+            tare_weight=record.tare_weight,
+            gross_weight=record.gross_weight,
+            net_weight=record.net_weight,
+            status=record.status
+        )
+        conn.execute(query)
+        conn.commit()
+        return {"Message": f"Second record added successfully!"}
+    except Exception as e:
+        return {"Message": f"Error occurred while adding second record: {str(e)}"}
