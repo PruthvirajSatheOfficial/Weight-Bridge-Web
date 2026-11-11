@@ -120,7 +120,7 @@ def add_record(record: Record, conn = Depends(get_db)):
         query = records.insert().values(
             supplier_id=record.supplier_id,
             product_id=record.product_id,
-            weight=record.weight,
+            weight=record.gross_weight,
             tare_weight=record.tare_weight,
             net_weight=record.net_weight,
             date_time=record.date_time
@@ -147,7 +147,7 @@ def update_record(record_id: int, record: Record, conn = Depends(get_db)):
         query = records.update().where(records.c.id == record_id).values(
             supplier_id=record.supplier_id,
             product_id=record.product_id,
-            weight=record.weight,
+            weight=record.gross_weight,
             tare_weight=record.tare_weight,
             net_weight=record.net_weight,
             date_time=record.date_time

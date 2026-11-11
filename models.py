@@ -23,7 +23,7 @@ class Record(BaseModel):
     id : int
     supplier_id : str
     product_id : int
-    weight : float
+    gross_weight : float
     tare_weight : float
     net_weight : float
     date_time : datetime
