@@ -35,10 +35,12 @@ records = Table(
     Column('id', Integer, primary_key=True),
     Column('product_id', Integer, nullable=False),
     Column('supplier_id', String, nullable=False),
-    Column('tare_weight', Integer, nullable=False),
-    Column('gross_weight', Integer, nullable=False),
-    Column('net_weight', Integer, nullable=False),
-    Column('date', String, nullable=False)
+    Column('tare_weight', Integer, nullable=True),
+    Column('gross_weight', Integer, nullable=True),
+    Column('net_weight', Integer, nullable=True),
+    Column('date', String, nullable=False),
+    Column('ticket_number', String, nullable=False),
+    Column('status', String, nullable=False)
 )
 
 def init_db():
