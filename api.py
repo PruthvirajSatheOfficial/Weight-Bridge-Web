@@ -1,4 +1,4 @@
-from fastapi import Depends, FastAPI, HTTPException, APIRouter
+from fastapi import Depends, FastAPI, HTTPException, APIRouter, status
 from database import get_db , products, users, suppliers, records
 from models import Product, User, Record, Supplier
 
@@ -151,14 +151,14 @@ def update_supplier(supplier_id: str, supplier: Supplier, conn = Depends(get_db)
         return {"Message": f"Error occurred while updating supplier: {str(e)}"}
 
 
-@router.post('/record/first_record')
-def first_record(record: Record, conn = Depends(get_db)):
+@router.post('/record/first_weight')
+def add_first_weight(record: Record, conn = Depends(get_db)):
     try:
         query = records.insert().values(
             supplier_id=record.supplier_id,
             product_id=record.product_id,
-            tare_weight=record.tare_weight,
             gross_weight=record.gross_weight,
+            tare_weight=record.tare_weight,
             net_weight=record.net_weight,
             date_time=record.date_time,
             ticket_number=record.ticket_number,
@@ -166,21 +166,41 @@ def first_record(record: Record, conn = Depends(get_db)):
         )
         conn.execute(query)
         conn.commit()
-        return {"Message": f"First record added successfully!"}
+        return {"Message": f"Record with ticket number {record.ticket_number} added successfully!"}
     except Exception as e:
-        return {"Message": f"Error occurred while adding first record: {str(e)}"}
+        return {"Message": f"Error occurred while adding record: {str(e)}"}
 
-@router.post('/record/second_record')
-def second_record(record: Record, conn = Depends(get_db)):
+@router.put('/record/second_weight/{ticket_number}')
+def update_second_weight(record: Record, ticket_number: str, conn = Depends(get_db)):
     try:
-        query = records.insert().values(
-            tare_weight=record.tare_weight,
-            gross_weight=record.gross_weight,
-            net_weight=record.net_weight,
-            status=record.status
+        query = records.select().where(records.c.ticket_number == ticket_number)
+        result = conn.execute(query).fetchone()
+
+        if result is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Ticket number '{ticket_number}' not found."
+            )
+
+        existing_record = dict(result._mapping)
+        tare_weight = existing_record['tare_weight']
+
+        if tare_weight is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Initial tare weight is missing for this ticket."
+            )
+
+        gross_weight = record.gross_weight
+        net_weight = gross_weight - tare_weight
+        update_query = records.update().where(records.c.ticket_number == ticket_number).values(
+            gross_weight=gross_weight,
+            net_weight=net_weight,
+            status="COMPLETED"
         )
-        conn.execute(query)
+        conn.execute(update_query)
         conn.commit()
-        return {"Message": f"Second record added successfully!"}
+        return {"Message": f"Record with ticket number {ticket_number} updated successfully!"}
+
     except Exception as e:
-        return {"Message": f"Error occurred while adding second record: {str(e)}"}
+        return {"Message": f"Error occurred while updating record: {str(e)}"}

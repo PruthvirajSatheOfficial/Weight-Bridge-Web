@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import Optional
 from datetime import datetime
 
 # Class List 6/11/26
@@ -20,10 +21,12 @@ class Product(BaseModel):
     name : str 
 
 class Record(BaseModel):
-    id : int
-    supplier_id : str
-    product_id : int
-    gross_weight : float
-    tare_weight : float
-    net_weight : float
-    date_time : datetime
+    id: Optional[int] = None
+    supplier_id: str
+    product_id: int
+    gross_weight: Optional[float] = None
+    tare_weight: float
+    net_weight: Optional[float] = None
+    date_time: Optional[datetime] = None
+    ticket_number: Optional[str] = None
+    status: Optional[str] = "PENDING"

@@ -1,3 +1,4 @@
+
 from sqlalchemy import create_engine , MetaData, Table, Column , Integer , String, inspect
 
 engine = create_engine('sqlite:///weight_bridge.db', echo=True)
@@ -44,7 +45,7 @@ records = Table(
 )
 
 def init_db():
-    meta.create_all(engine)
+    meta.create_all(bind=engine)
 
 def get_db():
     conn = engine.connect()
